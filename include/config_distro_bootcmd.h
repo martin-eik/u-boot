@@ -390,7 +390,96 @@
 
 #define BOOTENV_DEV(devtypeu, devtypel, instance) \
         BOOTENV_DEV_##devtypeu(devtypeu, devtypel, instance)
+
+/*
+   "fpga_image_size=6AEBE4\0"                                                 \
+*/
+
+#define BOOTENV_EIKON_ADDITION \
+   "de0_part=cv_se_a4\0"                                                      \
+   "de10_part=cv_se_a6\0"                                                     \
+   "default_rbf=boot/de0_default.rbf\0"                                       \
+   "de0_rbf=boot/mic_de0.rbf\0"                                           \
+   "de10_rbf=boot/mic_de10.rbf\0"                                         \
+   "setenv selected_rbf ${default_rbf}\0"                                     \
+   "fpga_load_addr=2000000\0"                                                 \
+   \
+   "set_de0_files="                                                           \
+      "if test -e ${devtype} ${devnum}:${distro_bootpart} ${de0_rbf}; then "  \
+         "setenv selected_rbf ${de0_rbf}; "                                   \
+      "else "                                                                 \
+         "setenv selected_rbf ${default_rbf}; "                               \
+         "echo \"Fallback to default rbf: ${default_rbf}\"; "                 \
+      "fi;\0"                                                                 \
+   \
+   "set_de10_files="                                                          \
+      "if test -e ${devtype} ${devnum}:${distro_bootpart} ${de10_rbf}; then " \
+         "setenv selected_rbf ${de10_rbf}; "                                  \
+      "else "                                                                 \
+         "setenv selected_rbf ${default_rbf}; "                               \
+         "echo \"Fallback to default rbf: ${default_rbf}\"; "                 \
+      "fi;\0"                                                                 \
+   \
+   "test_fpga_type="                                                          \
+      "devtype=mmc; "                                                         \
+      "devnum=0; "                                                            \
+      "distro_bootpart=2; "                                                   \
+      "echo \"Hack: Assuming: ${devtype} ${devnum}:${distro_bootpart} !\"; "  \
+      "if test ${fpgatype} = ${de0_part}; then "                              \
+            "echo \"Detected: DE0\"; "                                        \
+            "run set_de0_files; "                                             \
+      "fi; "                                                                  \
+      "if test ${fpgatype} = ${de10_part}; then "                             \
+            "echo \"Detected: DE10\"; "                                       \
+            "run set_de10_files; "                                            \
+      "fi\0"                                                                  \
+   \
+   "loadfpgaimage="                                                           \
+      "size ${devtype} ${devnum}:${distro_bootpart} ${selected_rbf}; "        \
+      "fpga_image_size=${filesize}; "                                         \
+      "echo \"Loading ${selected_rbf} file ${filesize}\" ;"                   \
+      "load ${devtype} ${devnum}:${distro_bootpart} ${fpga_load_addr} ${selected_rbf}\0"                      \
+   \
+   "loadfpganow="                                                             \
+      "fpga load 0 ${fpga_load_addr} ${fpga_image_size}\0"                    \
+   \
+   "loadfpga="                                                                \
+      "run test_fpga_type; "                                                  \
+      "run loadfpgaimage; "                                                   \
+      "run loadfpganow\0"                                                     \
+   \
+   "ethaddr="                                                                 \
+      "02:aa:bb:cc:77:77\0"                                                   \
+   \
+   "init_env="                                                                \
+      "if test -n \"$env_written\"; then ; "                                  \
+      "else "                                                                 \
+          "setenv env_written 1; "                                            \
+          "echo \"... inaugural saveenv\"; "                                  \
+          "saveenv; "                                                         \
+      "fi;\0"
+
+/*
+setenv ethaddr 02:aa:bb:cc:77:77
+setenv fileaddr 2000000
+setenv filesize 6aebe4
+setenv bootcmd "run loadfpga; bridge enable; run distro_bootcmd"
+setenv loadfpgaimage "load mmc 0:2 0x2000000 /boot/de0_default.rbf"
+setenv loadfpganow "fpga load 0 0x2000000 6AEBE4"
+setenv loadfpga "run loadfpgaimage; run loadfpganow"
+
+setenv env_written
+setenv bootcmd "run init_env; echo '"bootcmd: "'; run loadfpga; bridge enable; run distro_bootcmd"
+setenv init_env "if test -n '"$env_written"'; then ; else setenv env_written 1; echo '"... inaugural saveenv"'; saveenv; fi"
+run init_env
+*/
+
+#ifndef CONFIG_BOOTCOMMAND
+#define CONFIG_BOOTCOMMAND "run init_env; echo \"bootcmd: \"; run loadfpga; bridge enable; run distro_bootcmd"
+#endif
+
 #define BOOTENV \
+        BOOTENV_EIKON_ADDITION \
         BOOTENV_SHARED_HOST \
         BOOTENV_SHARED_MMC \
         BOOTENV_SHARED_PCI \
@@ -407,59 +496,6 @@
         "boot_script_dhcp=boot.scr.uimg\0" \
         BOOTENV_BOOT_TARGETS \
         \
-        "de0_part=cv_se_a4\0"                                                   \
-        "de10_part=cv_se_a6\0"                                                  \
-	"default_rbf=boot/de0_default.rbf\0"					\
-	"de0_rbf=boot/de0_default.rbf\0"					\
-	"de10_rbf=boot/de10_default.rbf\0"					\
-	"setenv selected_rbf ${default_rbf}\0"						\
-	"fpga_load_addr=2000000\0"                                              \
-	"fpga_image_size=6AEBE4\0"						\
-	\
-        "set_de0_files="							\
-		"if test -e ${devtype} ${devnum}:${distro_bootpart} ${de0_rbf}; then "		\
-			"setenv selected_rbf ${de0_rbf}; "                             \
-		"else "								\
-			"setenv selected_rbf ${default_rbf}; "                         \
-			"echo \"Fallback to default rbf: ${default_rbf}\"; "    \
-		"fi;\0"								\
-	\
-        "set_de10_files="							\
-		"if test -e ${devtype} ${devnum}:${distro_bootpart} ${de10_rbf}; then "		\
-			"setenv selected_rbf ${de10_rbf}; "                            \
-		"else "								\
-			"setenv selected_rbf ${default_rbf}; "                         \
-			"echo \"Fallback to default rbf: ${default_rbf}\"; "    \
-		"fi;\0"								\
-	\
-        "test_fpga_type="                                                       \
-		"echo Hack!; "							\
-		"devtype=mmc; "							\
-		"devnum=0; "							\
-		"distro_bootpart=2; "						\
-                "if test ${fpgatype} = ${de0_part}; then "                      \
-                        "echo \"Detected: DE0\"; "                              \
-                        "run set_de0_files; "                                   \
-                "fi; "                                                          \
-                "if test ${fpgatype} = ${de10_part}; then "                     \
-                        "echo \"Detected: DE10\"; "                             \
-                        "run set_de10_files; "                                  \
-                "fi\0"                                                          \
-	\
-        "loadfpgaimage_x="                                                      \
-                "load mmc 0:2 ${fpga_load_addr} ${selected_rbf}\0"              \
-	\
-        "loadfpgaimage="                                                        \
-                "load mmc 0:2 ${fpga_load_addr} ${selected_rbf}\0"              \
-        \
-        "loadfpganow="                                                          \
-                "fpga load 0 ${fpga_load_addr} ${fpga_image_size}\0"           	\
-        \
-        "loadfpga="                                                             \
-                "run test_fpga_type; "                                          \
-                "run loadfpgaimage; "                                           \
-                "run loadfpganow\0"                                             \
-	\
         "boot_syslinux_conf=extlinux/extlinux.conf\0"                     \
         "boot_extlinux="                                                  \
                 "sysboot ${devtype} ${devnum}:${distro_bootpart} any "    \

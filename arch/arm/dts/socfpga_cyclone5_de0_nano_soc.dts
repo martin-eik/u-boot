@@ -86,6 +86,16 @@
 	};
 };
 
+&i2c1 {
+	status = "okay";
+	clock-frequency = <100000>;
+};
+
+&i2c2 {
+	status = "okay";
+	clock-frequency = <100000>;
+};
+
 &mmc0 {
 	vmmc-supply = <&regulator_3_3v>;
 	vqmmc-supply = <&regulator_3_3v>;
@@ -93,6 +103,10 @@
 };
 
 &uart0 {
+	status = "okay";
+};
+
+&uart1 {
 	status = "okay";
 };
 

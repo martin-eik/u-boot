@@ -206,11 +206,11 @@ const u8 sys_mgr_init_table[] = {
 	0, /* QSPIUSEFPGA */
 	0, /* SPIS1USEFPGA */
 	0, /* RGMII0USEFPGA */
-	0, /* UART1USEFPGA */
+	1, /* UART1USEFPGA */
 	0, /* CAN1USEFPGA */
 	0, /* USB1USEFPGA */
 	0, /* I2C3USEFPGA */
-	0, /* I2C2USEFPGA */
+	1, /* I2C2USEFPGA */
 	0, /* I2C1USEFPGA */
 	0, /* SPIM1USEFPGA */
 	0, /* USB0USEFPGA */
