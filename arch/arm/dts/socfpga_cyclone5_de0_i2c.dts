@@ -70,8 +70,9 @@
 //			interrupts = <40>;   /* f2h_irq0 has GIC base 72 for FPGA_IRQ0. There is offset 32 (?) so int=40 # */
 
 			clocks =  <&osc1>, <&osc2>;	// ALMOST CERTAINLY NOT RIGHT!!! TODO!	clocks = <&osc>;
-			// clock-frequency = <400000>; /* i2c bus frequency 400 kHz */
-			clock-frequency = <100000>; /* i2c bus frequency 100 kHz */
+			// clock-frequency = <400000>;  /* i2c bus frequency 400 kHz */
+			// clock-frequency = <100000>;  /* i2c bus frequency 100 kHz looks like 200kHz (5us period)??? <20230518> */
+			clock-frequency = <50000>;      /* i2c bus frequency 50 kHz */
 
 			// reg-shift = <0>;     /* 8 bit registers */
 			// reg-io-width = <1>;  /* 8 bit read/write */
@@ -147,6 +148,18 @@
 
 &i2c1 {
 	status = "okay";
+	speed-mode = <0>;
+};
+
+&i2c2 {
+	status = "okay";
+  clock-frequency = <100000>;
+	speed-mode = <0>;
+};
+
+&i2c3 {
+	status = "okay";
+  clock-frequency = <100000>;
 	speed-mode = <0>;
 };
 

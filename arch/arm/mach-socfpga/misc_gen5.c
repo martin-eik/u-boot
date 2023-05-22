@@ -23,6 +23,8 @@
 
 #include <dt-bindings/reset/altr,rst-mgr.h>
 
+void cm_print_clock_quick_summary(void); // prototype from ./include/mach/clock_manager_gen5.h
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct pl310_regs *const pl310 =
@@ -120,10 +122,12 @@ int print_cpuinfo(void)
 	const u32 bsel =
 		SYSMGR_GET_BOOTINFO_BSEL(readl(&sysmgr_regs->bootinfo));
 
+	puts("SYS:   Eikon MIC\n");  //MV
 	puts("CPU:   Altera SoCFPGA Platform\n");
 	socfpga_fpga_id(1);
 
 	printf("BOOT:  %s\n", bsel_str[bsel].name);
+  cm_print_clock_quick_summary();   //MV
 	return 0;
 }
 #endif
