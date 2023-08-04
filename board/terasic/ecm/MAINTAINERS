@@ -1,0 +1,5 @@
+ECM BOARD
+M:	Martin Vana <m.vana11@gmail.com>
+S:	Maintained
+F:	include/configs/socfpga_ecm.h
+F:	configs/socfpga_ecm_defconfig

@@ -320,6 +320,7 @@ dtb-$(CONFIG_ARCH_SOCFPGA) +=				\
 	socfpga_cyclone5_de0_eikon.dtb				\
 	socfpga_cyclone5_de10_eikon.dtb				\
 	socfpga_cyclone5_devri.dtb				\
+	socfpga_cyclone5_ecm.dtb				\
 	socfpga_cyclone5_de0_i2c.dtb				\
 	socfpga_cyclone5_sockit.dtb
 	
